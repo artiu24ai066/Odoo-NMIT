@@ -1,59 +1,86 @@
 import { useState } from "react";
 import {
-  User,
+  UserRound,
   Mail,
   Phone,
+  MapPin,
   Building2,
-  BriefcaseBusiness,
-  Hash,
+  CalendarDays,
   Pencil,
-  Save,
-  X,
+  Plus,
+  ShieldCheck,
+  Lock,
 } from "lucide-react";
 
 function Profile() {
+  const [activeTab, setActiveTab] = useState("private");
   const [editing, setEditing] = useState(false);
 
   const [profile, setProfile] = useState({
-    name: "Employee",
-    employeeId: "EMP001",
-    email: "employee@example.com",
-    phone: "+91 9876543210",
+    name: "John Doe",
+    employeeId: "EMP0001",
+    email: "john.doe@company.com",
+    mobile: "+91 98765 43210",
+    company: "DAYFLOW",
     department: "Engineering",
-    position: "Software Engineer",
-    company: "Dayflow",
+    jobPosition: "Software Engineer",
+    manager: "Rahul Sharma",
+    location: "Hyderabad",
+    dateOfBirth: "15/05/2002",
+    joiningDate: "01/08/2022",
+    nationality: "Indian",
+    gender: "Male",
+    maritalStatus: "Single",
+    personalEmail: "john.personal@gmail.com",
+    address: "Hyderabad, Telangana",
   });
 
-  const [formData, setFormData] = useState(profile);
+  const [skills, setSkills] = useState([
+    "React",
+    "JavaScript",
+    "Node.js",
+    "MongoDB",
+  ]);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  const [certifications, setCertifications] = useState([
+    "Full Stack Development",
+    "JavaScript Certification",
+  ]);
 
-    setFormData((previous) => ({
-      ...previous,
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setProfile((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
 
-  const handleEdit = () => {
-    setFormData(profile);
-    setEditing(true);
+  const addSkill = () => {
+    const skill = window.prompt("Enter skill:");
+
+    if (skill && skill.trim()) {
+      setSkills((prev) => [...prev, skill.trim()]);
+    }
   };
 
-  const handleCancel = () => {
-    setFormData(profile);
-    setEditing(false);
-  };
+  const addCertification = () => {
+    const certification = window.prompt(
+      "Enter certification:"
+    );
 
-  const handleSave = () => {
-    setProfile(formData);
-    setEditing(false);
+    if (certification && certification.trim()) {
+      setCertifications((prev) => [
+        ...prev,
+        certification.trim(),
+      ]);
+    }
   };
 
   return (
     <div className="profile-page">
 
-      {/* Header */}
+      {/* PAGE HEADER */}
 
       <div className="profile-page-header">
 
@@ -62,70 +89,70 @@ function Profile() {
             Employee Portal
           </p>
 
-          <h1>My Profile</h1>
+          <h1>
+            My Profile
+          </h1>
 
           <p className="page-description">
-            View and manage your personal information.
+            View and manage your employee information.
           </p>
         </div>
 
-        {!editing ? (
-          <button
-            className="profile-edit-button"
-            onClick={handleEdit}
-          >
-            <Pencil size={16} />
-            Edit Profile
-          </button>
-        ) : (
-          <div className="profile-edit-actions">
+        <button
+          className="profile-edit-button"
+          onClick={() => setEditing((prev) => !prev)}
+        >
+          <Pencil size={15} />
 
-            <button
-              className="profile-cancel-button"
-              onClick={handleCancel}
-            >
-              <X size={16} />
-              Cancel
-            </button>
-
-            <button
-              className="profile-save-button"
-              onClick={handleSave}
-            >
-              <Save size={16} />
-              Save Changes
-            </button>
-
-          </div>
-        )}
+          {editing ? "Save Changes" : "Edit Profile"}
+        </button>
 
       </div>
 
 
-      {/* Profile Card */}
+      {/* PROFILE HEADER */}
 
-      <section className="profile-card">
+      <section className="profile-header-card">
 
-        {/* Profile Header */}
+        <div className="profile-avatar">
 
-        <div className="profile-card-header">
+          <UserRound size={38} />
 
-          <div className="large-profile-avatar">
-            <User size={38} />
-          </div>
+          <button
+            className="avatar-edit-button"
+            title="Change profile picture"
+          >
+            <Pencil size={12} />
+          </button>
 
-          <div className="profile-main-info">
+        </div>
 
-            <h2>
-              {profile.name}
-            </h2>
 
-            <p>
-              {profile.position}
-            </p>
+        <div className="profile-main-info">
+
+          <h2>
+            {profile.name}
+          </h2>
+
+          <p className="profile-position">
+            {profile.jobPosition}
+          </p>
+
+          <div className="profile-meta">
 
             <span>
-              {profile.employeeId}
+              <Mail size={14} />
+              {profile.email}
+            </span>
+
+            <span>
+              <Phone size={14} />
+              {profile.mobile}
+            </span>
+
+            <span>
+              <MapPin size={14} />
+              {profile.location}
             </span>
 
           </div>
@@ -133,173 +160,548 @@ function Profile() {
         </div>
 
 
-        {/* Information */}
+        <div className="profile-company-info">
 
-        <div className="profile-information">
+          <div>
+            <span>Employee ID</span>
+            <strong>{profile.employeeId}</strong>
+          </div>
 
-          <h3>
-            Personal Information
-          </h3>
+          <div>
+            <span>Department</span>
+            <strong>{profile.department}</strong>
+          </div>
 
-          <div className="profile-fields">
+          <div>
+            <span>Company</span>
+            <strong>{profile.company}</strong>
+          </div>
 
-            {/* Name */}
-
-            <div className="profile-field">
-
-              <label>
-                Full Name
-              </label>
-
-              {editing ? (
-                <input
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                />
-              ) : (
-                <div className="profile-field-value">
-                  <User size={16} />
-                  {profile.name}
-                </div>
-              )}
-
-            </div>
-
-
-            {/* Email */}
-
-            <div className="profile-field">
-
-              <label>
-                Email
-              </label>
-
-              {editing ? (
-                <input
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              ) : (
-                <div className="profile-field-value">
-                  <Mail size={16} />
-                  {profile.email}
-                </div>
-              )}
-
-            </div>
-
-
-            {/* Phone */}
-
-            <div className="profile-field">
-
-              <label>
-                Phone Number
-              </label>
-
-              {editing ? (
-                <input
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
-              ) : (
-                <div className="profile-field-value">
-                  <Phone size={16} />
-                  {profile.phone}
-                </div>
-              )}
-
-            </div>
-
-
-            {/* Employee ID */}
-
-            <div className="profile-field">
-
-              <label>
-                Employee ID
-              </label>
-
-              <div className="profile-field-value">
-                <Hash size={16} />
-                {profile.employeeId}
-              </div>
-
-            </div>
-
-
-            {/* Department */}
-
-            <div className="profile-field">
-
-              <label>
-                Department
-              </label>
-
-              {editing ? (
-                <input
-                  name="department"
-                  value={formData.department}
-                  onChange={handleChange}
-                />
-              ) : (
-                <div className="profile-field-value">
-                  <Building2 size={16} />
-                  {profile.department}
-                </div>
-              )}
-
-            </div>
-
-
-            {/* Position */}
-
-            <div className="profile-field">
-
-              <label>
-                Job Position
-              </label>
-
-              {editing ? (
-                <input
-                  name="position"
-                  value={formData.position}
-                  onChange={handleChange}
-                />
-              ) : (
-                <div className="profile-field-value">
-                  <BriefcaseBusiness size={16} />
-                  {profile.position}
-                </div>
-              )}
-
-            </div>
-
-
-            {/* Company */}
-
-            <div className="profile-field">
-
-              <label>
-                Company
-              </label>
-
-              <div className="profile-field-value">
-                <Building2 size={16} />
-                {profile.company}
-              </div>
-
-            </div>
-
+          <div>
+            <span>Manager</span>
+            <strong>{profile.manager}</strong>
           </div>
 
         </div>
 
       </section>
+
+
+      {/* TABS */}
+
+      <div className="profile-tabs">
+
+        <button
+          className={
+            activeTab === "private"
+              ? "profile-tab active"
+              : "profile-tab"
+          }
+          onClick={() => setActiveTab("private")}
+        >
+          Private Info
+        </button>
+
+        <button
+          className={
+            activeTab === "salary"
+              ? "profile-tab active"
+              : "profile-tab"
+          }
+          onClick={() => setActiveTab("salary")}
+        >
+          Salary Info
+        </button>
+
+        <button
+          className={
+            activeTab === "security"
+              ? "profile-tab active"
+              : "profile-tab"
+          }
+          onClick={() => setActiveTab("security")}
+        >
+          Security
+        </button>
+
+      </div>
+
+
+      {/* PRIVATE INFO */}
+
+      {activeTab === "private" && (
+
+        <div className="profile-content-grid">
+
+          <section className="profile-section">
+
+            <div className="profile-section-header">
+
+              <div>
+                <h2>
+                  Private Information
+                </h2>
+
+                <p>
+                  Personal information associated
+                  with your account.
+                </p>
+              </div>
+
+              <UserRound size={18} />
+
+            </div>
+
+
+            <div className="profile-fields">
+
+              <ProfileField
+                label="Date of Birth"
+                name="dateOfBirth"
+                value={profile.dateOfBirth}
+                editing={editing}
+                onChange={handleChange}
+              />
+
+              <ProfileField
+                label="Joining Date"
+                name="joiningDate"
+                value={profile.joiningDate}
+                editing={editing}
+                onChange={handleChange}
+              />
+
+              <ProfileField
+                label="Nationality"
+                name="nationality"
+                value={profile.nationality}
+                editing={editing}
+                onChange={handleChange}
+              />
+
+              <ProfileField
+                label="Gender"
+                name="gender"
+                value={profile.gender}
+                editing={editing}
+                onChange={handleChange}
+              />
+
+              <ProfileField
+                label="Marital Status"
+                name="maritalStatus"
+                value={profile.maritalStatus}
+                editing={editing}
+                onChange={handleChange}
+              />
+
+              <ProfileField
+                label="Personal Email"
+                name="personalEmail"
+                value={profile.personalEmail}
+                editing={editing}
+                onChange={handleChange}
+              />
+
+              <ProfileField
+                label="Mobile"
+                name="mobile"
+                value={profile.mobile}
+                editing={editing}
+                onChange={handleChange}
+              />
+
+              <ProfileField
+                label="Address"
+                name="address"
+                value={profile.address}
+                editing={editing}
+                onChange={handleChange}
+              />
+
+            </div>
+
+          </section>
+
+
+          {/* ABOUT */}
+
+          <section className="profile-section">
+
+            <div className="profile-section-header">
+
+              <div>
+                <h2>
+                  About
+                </h2>
+
+                <p>
+                  Information about the employee.
+                </p>
+              </div>
+
+              <UserRound size={18} />
+
+            </div>
+
+
+            <div className="about-content">
+
+              <h3>
+                Job Position
+              </h3>
+
+              <p>
+                {profile.jobPosition}
+              </p>
+
+              <h3>
+                Department
+              </h3>
+
+              <p>
+                {profile.department}
+              </p>
+
+              <h3>
+                Manager
+              </h3>
+
+              <p>
+                {profile.manager}
+              </p>
+
+            </div>
+
+          </section>
+
+
+          {/* SKILLS */}
+
+          <section className="profile-section">
+
+            <div className="profile-section-header">
+
+              <div>
+                <h2>
+                  Skills
+                </h2>
+
+                <p>
+                  Technical and professional skills.
+                </p>
+              </div>
+
+              <button
+                className="small-add-button"
+                onClick={addSkill}
+              >
+                <Plus size={14} />
+                Add Skill
+              </button>
+
+            </div>
+
+
+            <div className="profile-tags">
+
+              {skills.map((skill, index) => (
+                <span
+                  className="profile-tag"
+                  key={index}
+                >
+                  {skill}
+                </span>
+              ))}
+
+            </div>
+
+          </section>
+
+
+          {/* CERTIFICATIONS */}
+
+          <section className="profile-section">
+
+            <div className="profile-section-header">
+
+              <div>
+                <h2>
+                  Certifications
+                </h2>
+
+                <p>
+                  Professional certifications.
+                </p>
+              </div>
+
+              <button
+                className="small-add-button"
+                onClick={addCertification}
+              >
+                <Plus size={14} />
+                Add
+              </button>
+
+            </div>
+
+
+            <div className="certification-list">
+
+              {certifications.map(
+                (certification, index) => (
+
+                  <div
+                    className="certification-item"
+                    key={index}
+                  >
+
+                    <div className="certification-icon">
+                      <ShieldCheck size={16} />
+                    </div>
+
+                    <span>
+                      {certification}
+                    </span>
+
+                  </div>
+
+                )
+              )}
+
+            </div>
+
+          </section>
+
+        </div>
+      )}
+
+
+      {/* SALARY */}
+
+      {activeTab === "salary" && (
+
+        <section className="salary-section">
+
+          <div className="salary-header">
+
+            <div>
+              <h2>
+                Salary Information
+              </h2>
+
+              <p>
+                Compensation information.
+              </p>
+            </div>
+
+            <span className="admin-only-badge">
+              Admin / HR Only
+            </span>
+
+          </div>
+
+
+          <div className="salary-warning">
+
+            <Lock size={16} />
+
+            <span>
+              Salary information is restricted
+              to authorized users.
+            </span>
+
+          </div>
+
+
+          <div className="salary-summary">
+
+            <div>
+              <span>Monthly Wage</span>
+              <strong>₹50,000</strong>
+            </div>
+
+            <div>
+              <span>Yearly Wage</span>
+              <strong>₹6,00,000</strong>
+            </div>
+
+            <div>
+              <span>Working Days</span>
+              <strong>5 Days</strong>
+            </div>
+
+            <div>
+              <span>Break Time</span>
+              <strong>1 Hour</strong>
+            </div>
+
+          </div>
+
+
+          <div className="salary-components">
+
+            <h3>
+              Salary Components
+            </h3>
+
+            <SalaryRow
+              name="Basic Salary"
+              amount="₹25,000"
+            />
+
+            <SalaryRow
+              name="House Rent Allowance"
+              amount="₹12,500"
+            />
+
+            <SalaryRow
+              name="Performance Bonus"
+              amount="₹2,082"
+            />
+
+            <SalaryRow
+              name="Fixed Allowance"
+              amount="₹2,918"
+            />
+
+          </div>
+
+        </section>
+      )}
+
+
+      {/* SECURITY */}
+
+      {activeTab === "security" && (
+
+        <section className="profile-section">
+
+          <div className="profile-section-header">
+
+            <div>
+              <h2>
+                Security
+              </h2>
+
+              <p>
+                Account and security information.
+              </p>
+            </div>
+
+            <Lock size={18} />
+
+          </div>
+
+
+          <div className="security-grid">
+
+            <div className="security-group">
+
+              <h3>
+                Account
+              </h3>
+
+              <ProfileField
+                label="Email"
+                value={profile.email}
+              />
+
+              <ProfileField
+                label="Employee ID"
+                value={profile.employeeId}
+              />
+
+            </div>
+
+
+            <div className="security-group">
+
+              <h3>
+                Security
+              </h3>
+
+              <ProfileField
+                label="Password"
+                value="••••••••••"
+              />
+
+              <ProfileField
+                label="Two-Factor Authentication"
+                value="Not Enabled"
+              />
+
+            </div>
+
+          </div>
+
+        </section>
+      )}
+
+    </div>
+  );
+}
+
+
+/* =========================================
+   PROFILE FIELD
+========================================= */
+
+function ProfileField({
+  label,
+  name,
+  value,
+  editing,
+  onChange,
+}) {
+  return (
+    <div className="profile-field">
+
+      <label>
+        {label}
+      </label>
+
+      {editing && name ? (
+        <input
+          name={name}
+          value={value}
+          onChange={onChange}
+        />
+      ) : (
+        <span>
+          {value || "--"}
+        </span>
+      )}
+
+    </div>
+  );
+}
+
+
+/* =========================================
+   SALARY ROW
+========================================= */
+
+function SalaryRow({
+  name,
+  amount,
+}) {
+  return (
+    <div className="salary-row">
+
+      <div>
+        <strong>
+          {name}
+        </strong>
+
+        <small>
+          Salary component
+        </small>
+      </div>
+
+      <span>
+        {amount}
+      </span>
 
     </div>
   );

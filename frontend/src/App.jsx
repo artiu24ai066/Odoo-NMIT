@@ -11,10 +11,12 @@ import {
   Users,
   CalendarCheck,
   Clock3,
+  UserRound,
 } from "lucide-react";
 
 import TimeOff from "./pages/TimeOff";
 import Attendance from "./pages/Attendance";
+import Profile from "./pages/Profile";
 
 import "./App.css";
 
@@ -26,7 +28,6 @@ import "./App.css";
 function Dashboard() {
   return (
     <div className="placeholder-page">
-
       <p className="page-eyebrow">
         Employee Portal
       </p>
@@ -38,7 +39,6 @@ function Dashboard() {
       <p className="page-description">
         Dashboard content will be available here.
       </p>
-
     </div>
   );
 }
@@ -51,7 +51,6 @@ function Dashboard() {
 function Employees() {
   return (
     <div className="placeholder-page">
-
       <p className="page-eyebrow">
         Employee Portal
       </p>
@@ -63,7 +62,6 @@ function Employees() {
       <p className="page-description">
         Employee management will be available here.
       </p>
-
     </div>
   );
 }
@@ -93,6 +91,8 @@ function Navigation() {
 
         <nav className="main-navigation">
 
+          {/* DASHBOARD */}
+
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
@@ -101,15 +101,15 @@ function Navigation() {
               }`
             }
           >
-
             <LayoutDashboard size={17} />
 
             <span>
               Dashboard
             </span>
-
           </NavLink>
 
+
+          {/* EMPLOYEES */}
 
           <NavLink
             to="/employees"
@@ -119,15 +119,15 @@ function Navigation() {
               }`
             }
           >
-
             <Users size={17} />
 
             <span>
               Employees
             </span>
-
           </NavLink>
 
+
+          {/* ATTENDANCE */}
 
           <NavLink
             to="/attendance"
@@ -137,15 +137,15 @@ function Navigation() {
               }`
             }
           >
-
             <CalendarCheck size={17} />
 
             <span>
               Attendance
             </span>
-
           </NavLink>
 
+
+          {/* TIME OFF */}
 
           <NavLink
             to="/time-off"
@@ -155,13 +155,29 @@ function Navigation() {
               }`
             }
           >
-
             <Clock3 size={17} />
 
             <span>
               Time Off
             </span>
+          </NavLink>
 
+
+          {/* MY PROFILE */}
+
+          <NavLink
+            to="/profile"
+            className={({ isActive }) =>
+              `navigation-link ${
+                isActive ? "active" : ""
+              }`
+            }
+          >
+            <UserRound size={17} />
+
+            <span>
+              My Profile
+            </span>
           </NavLink>
 
         </nav>
@@ -187,6 +203,8 @@ function App() {
 
         <Routes>
 
+          {/* ROOT */}
+
           <Route
             path="/"
             element={
@@ -197,25 +215,48 @@ function App() {
             }
           />
 
+
+          {/* DASHBOARD */}
+
           <Route
             path="/dashboard"
             element={<Dashboard />}
           />
+
+
+          {/* EMPLOYEES */}
 
           <Route
             path="/employees"
             element={<Employees />}
           />
 
+
+          {/* ATTENDANCE */}
+
           <Route
             path="/attendance"
             element={<Attendance />}
           />
 
+
+          {/* TIME OFF */}
+
           <Route
             path="/time-off"
             element={<TimeOff />}
           />
+
+
+          {/* PROFILE */}
+
+          <Route
+            path="/profile"
+            element={<Profile />}
+          />
+
+
+          {/* INVALID ROUTE */}
 
           <Route
             path="*"
