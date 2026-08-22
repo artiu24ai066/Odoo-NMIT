@@ -1,82 +1,235 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  NavLink,
+  Navigate,
+} from "react-router-dom";
 
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
-import Employees from "./pages/Employees";
-import Attendance from "./pages/Attendance";
+import {
+  LayoutDashboard,
+  Users,
+  CalendarCheck,
+  Clock3,
+} from "lucide-react";
+
 import TimeOff from "./pages/TimeOff";
-import Profile from "./pages/Profile";
+import Attendance from "./pages/Attendance";
 
-import Layout from "./components/Layout";
+import "./App.css";
+
+
+/* =========================================
+   PLACEHOLDER DASHBOARD
+========================================= */
+
+function Dashboard() {
+  return (
+    <div className="placeholder-page">
+
+      <p className="page-eyebrow">
+        Employee Portal
+      </p>
+
+      <h1>
+        Dashboard
+      </h1>
+
+      <p className="page-description">
+        Dashboard content will be available here.
+      </p>
+
+    </div>
+  );
+}
+
+
+/* =========================================
+   PLACEHOLDER EMPLOYEES
+========================================= */
+
+function Employees() {
+  return (
+    <div className="placeholder-page">
+
+      <p className="page-eyebrow">
+        Employee Portal
+      </p>
+
+      <h1>
+        Employees
+      </h1>
+
+      <p className="page-description">
+        Employee management will be available here.
+      </p>
+
+    </div>
+  );
+}
+
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+function Navigation() {
+  return (
+    <header className="top-navigation">
+
+      <div className="navigation-container">
+
+        {/* LOGO */}
+
+        <NavLink
+          to="/dashboard"
+          className="brand-logo"
+        >
+          DAYFLOW
+        </NavLink>
+
+
+        {/* NAVIGATION */}
+
+        <nav className="main-navigation">
+
+          <NavLink
+            to="/dashboard"
+            className={({ isActive }) =>
+              `navigation-link ${
+                isActive ? "active" : ""
+              }`
+            }
+          >
+
+            <LayoutDashboard size={17} />
+
+            <span>
+              Dashboard
+            </span>
+
+          </NavLink>
+
+
+          <NavLink
+            to="/employees"
+            className={({ isActive }) =>
+              `navigation-link ${
+                isActive ? "active" : ""
+              }`
+            }
+          >
+
+            <Users size={17} />
+
+            <span>
+              Employees
+            </span>
+
+          </NavLink>
+
+
+          <NavLink
+            to="/attendance"
+            className={({ isActive }) =>
+              `navigation-link ${
+                isActive ? "active" : ""
+              }`
+            }
+          >
+
+            <CalendarCheck size={17} />
+
+            <span>
+              Attendance
+            </span>
+
+          </NavLink>
+
+
+          <NavLink
+            to="/time-off"
+            className={({ isActive }) =>
+              `navigation-link ${
+                isActive ? "active" : ""
+              }`
+            }
+          >
+
+            <Clock3 size={17} />
+
+            <span>
+              Time Off
+            </span>
+
+          </NavLink>
+
+        </nav>
+
+      </div>
+
+    </header>
+  );
+}
+
+
+/* =========================================
+   APP
+========================================= */
 
 function App() {
   return (
     <BrowserRouter>
 
-      <Routes>
+      <Navigation />
 
-        {/* Authentication */}
+      <main className="app-content">
 
-        <Route
-          path="/"
-          element={<Login />}
-        />
+        <Routes>
 
-        <Route
-          path="/signup"
-          element={<Signup />}
-        />
+          <Route
+            path="/"
+            element={
+              <Navigate
+                to="/dashboard"
+                replace
+              />
+            }
+          />
 
+          <Route
+            path="/dashboard"
+            element={<Dashboard />}
+          />
 
-        {/* Application */}
+          <Route
+            path="/employees"
+            element={<Employees />}
+          />
 
-        <Route
-          path="/dashboard"
-          element={
-            <Layout>
-              <Dashboard />
-            </Layout>
-          }
-        />
+          <Route
+            path="/attendance"
+            element={<Attendance />}
+          />
 
-        <Route
-          path="/employees"
-          element={
-            <Layout>
-              <Employees />
-            </Layout>
-          }
-        />
+          <Route
+            path="/time-off"
+            element={<TimeOff />}
+          />
 
-        <Route
-          path="/attendance"
-          element={
-            <Layout>
-              <Attendance />
-            </Layout>
-          }
-        />
+          <Route
+            path="*"
+            element={
+              <Navigate
+                to="/dashboard"
+                replace
+              />
+            }
+          />
 
-        <Route
-          path="/time-off"
-          element={
-            <Layout>
-              <TimeOff />
-            </Layout>
-          }
-        />
+        </Routes>
 
-        <Route
-          path="/profile"
-          element={
-            <Layout>
-              <Profile />
-            </Layout>
-          }
-        />
-
-      </Routes>
+      </main>
 
     </BrowserRouter>
   );
