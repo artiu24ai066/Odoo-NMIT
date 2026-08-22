@@ -1,70 +1,85 @@
 import { useState } from "react";
 import {
   CalendarDays,
+  Plus,
+  X,
+  Paperclip,
   Clock3,
   CheckCircle2,
   XCircle,
-  Send,
+  AlertCircle,
 } from "lucide-react";
 
 function TimeOff() {
+  const [activeType, setActiveType] = useState("Paid Time Off");
+
+  const [requests, setRequests] = useState(() => {
+    const saved = localStorage.getItem("dayflow_timeoff");
+
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [showForm, setShowForm] = useState(false);
 
   const [formData, setFormData] = useState({
-    type: "Paid Leave",
+    type: "Paid Time Off",
     startDate: "",
     endDate: "",
     reason: "",
+    attachment: null,
   });
 
-  const [requests, setRequests] = useState([
-    {
-      type: "Paid Leave",
-      startDate: "28/10/2025",
-      endDate: "30/10/2025",
-      days: 3,
-      status: "Approved",
-    },
-    {
-      type: "Sick Leave",
-      startDate: "15/09/2025",
-      endDate: "15/09/2025",
-      days: 1,
-      status: "Approved",
-    },
-  ]);
+  const leaveBalances = {
+    "Paid Time Off": 24,
+    "Sick Leave": 7,
+    "Unpaid Leave": 0,
+  };
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  const getDays = (startDate, endDate) => {
+    if (!startDate || !endDate) {
+      return 0;
+    }
 
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (end < start) {
+      return 0;
+    }
+
+    const difference = end - start;
+
+    return Math.floor(
+      difference / (1000 * 60 * 60 * 24)
+    ) + 1;
+  };
+
+  const requestedDays = getDays(
+    formData.startDate,
+    formData.endDate
+  );
+
+  const updateField = (field, value) => {
     setFormData((previous) => ({
       ...previous,
-      [name]: value,
+      [field]: value,
     }));
   };
 
-  const calculateDays = () => {
-    if (!formData.startDate || !formData.endDate) {
-      return 1;
-    }
+  const openRequestForm = () => {
+    setFormData({
+      type: activeType,
+      startDate: "",
+      endDate: "",
+      reason: "",
+      attachment: null,
+    });
 
-    const start = new Date(formData.startDate);
-    const end = new Date(formData.endDate);
-
-    const difference =
-      Math.ceil(
-        (end - start) / (1000 * 60 * 60 * 24)
-      ) + 1;
-
-    return difference > 0 ? difference : 1;
+    setShowForm(true);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "--";
-
-    const date = new Date(dateString);
-
-    return date.toLocaleDateString("en-GB");
+  const closeRequestForm = () => {
+    setShowForm(false);
   };
 
   const handleSubmit = (event) => {
@@ -75,375 +90,276 @@ function TimeOff() {
       !formData.endDate ||
       !formData.reason
     ) {
-      alert("Please fill all the fields.");
+      alert("Please fill all required fields.");
+      return;
+    }
+
+    if (requestedDays <= 0) {
+      alert("Please select valid dates.");
+      return;
+    }
+
+    if (
+      formData.type !== "Unpaid Leave" &&
+      requestedDays > leaveBalances[formData.type]
+    ) {
+      alert(
+        `You only have ${leaveBalances[formData.type]} days available.`
+      );
       return;
     }
 
     const newRequest = {
+      id: Date.now(),
+      employee: "John Doe",
       type: formData.type,
-      startDate: formatDate(formData.startDate),
-      endDate: formatDate(formData.endDate),
-      days: calculateDays(),
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      days: requestedDays,
+      reason: formData.reason,
+      attachment: formData.attachment
+        ? formData.attachment.name
+        : null,
       status: "Pending",
+      createdAt: new Date().toISOString(),
     };
 
-    setRequests((previous) => [
+    const updatedRequests = [
       newRequest,
-      ...previous,
-    ]);
+      ...requests,
+    ];
+
+    setRequests(updatedRequests);
+
+    localStorage.setItem(
+      "dayflow_timeoff",
+      JSON.stringify(updatedRequests)
+    );
+
+    setShowForm(false);
 
     setFormData({
-      type: "Paid Leave",
+      type: activeType,
       startDate: "",
       endDate: "",
       reason: "",
+      attachment: null,
     });
+  };
 
-    setShowForm(false);
+  const cancelRequest = (id) => {
+    const updatedRequests = requests.filter(
+      (request) => request.id !== id
+    );
+
+    setRequests(updatedRequests);
+
+    localStorage.setItem(
+      "dayflow_timeoff",
+      JSON.stringify(updatedRequests)
+    );
+  };
+
+  const getStatusIcon = (status) => {
+    if (status === "Approved") {
+      return <CheckCircle2 size={16} />;
+    }
+
+    if (status === "Rejected") {
+      return <XCircle size={16} />;
+    }
+
+    return <Clock3 size={16} />;
+  };
+
+  const getStatusClass = (status) => {
+    if (status === "Approved") {
+      return "status-approved";
+    }
+
+    if (status === "Rejected") {
+      return "status-rejected";
+    }
+
+    return "status-pending";
   };
 
   return (
     <div className="timeoff-page">
 
-      {/* PAGE HEADER */}
+      {/* HEADER */}
 
-      <div className="timeoff-page-header">
-
+      <div className="timeoff-header">
         <div>
           <p className="page-eyebrow">
-            Employee Portal
+            EMPLOYEE PORTAL
           </p>
 
           <h1>Time Off</h1>
 
           <p className="page-description">
-            Manage your leave balance and time-off requests.
+            Manage your leave requests and available
+            time off.
           </p>
         </div>
 
         <button
-          className="request-leave-button"
-          onClick={() =>
-            setShowForm((previous) => !previous)
-          }
+          className="new-timeoff-button"
+          onClick={openRequestForm}
         >
-          <CalendarDays size={16} />
+          <Plus size={18} />
 
-          {showForm
-            ? "Close Request"
-            : "Request Time Off"}
+          New Request
         </button>
-
       </div>
 
+      {/* LEAVE TYPE TABS */}
 
-      {/* LEAVE BALANCE */}
+      <section className="leave-type-section">
 
-      <div className="leave-balance-grid">
+        <div className="leave-tabs">
 
-        <div className="leave-balance-card">
-
-          <span>
-            Paid Time Off
-          </span>
-
-          <strong>
-            24
-          </strong>
-
-          <small>
-            days available
-          </small>
-
-        </div>
-
-
-        <div className="leave-balance-card">
-
-          <span>
-            Sick Time Off
-          </span>
-
-          <strong>
-            7
-          </strong>
-
-          <small>
-            days available
-          </small>
-
-        </div>
-
-
-        <div className="leave-balance-card">
-
-          <span>
-            Pending Requests
-          </span>
-
-          <strong>
-            {
-              requests.filter(
-                (request) =>
-                  request.status === "Pending"
-              ).length
+          <button
+            className={
+              activeType === "Paid Time Off"
+                ? "leave-tab active"
+                : "leave-tab"
             }
-          </strong>
+            onClick={() =>
+              setActiveType("Paid Time Off")
+            }
+          >
+            Paid Time Off
+          </button>
 
-          <small>
-            awaiting approval
-          </small>
+          <button
+            className={
+              activeType === "Sick Leave"
+                ? "leave-tab active"
+                : "leave-tab"
+            }
+            onClick={() =>
+              setActiveType("Sick Leave")
+            }
+          >
+            Sick Leave
+          </button>
+
+          <button
+            className={
+              activeType === "Unpaid Leave"
+                ? "leave-tab active"
+                : "leave-tab"
+            }
+            onClick={() =>
+              setActiveType("Unpaid Leave")
+            }
+          >
+            Unpaid Leave
+          </button>
 
         </div>
 
-      </div>
-
-
-      {/* REQUEST FORM */}
-
-      {showForm && (
-        <section className="leave-request-form">
-
-          <div className="leave-form-header">
-
-            <div>
-
-              <h2>
-                Time Off Type Request
-              </h2>
-
-              <p>
-                Submit a request for leave.
-              </p>
-
-            </div>
-
-          </div>
-
-
-          <form onSubmit={handleSubmit}>
-
-            <div className="leave-form-grid">
-
-              {/* EMPLOYEE */}
-
-              <div className="leave-form-field">
-
-                <label>
-                  Employee
-                </label>
-
-                <input
-                  type="text"
-                  value="Current Employee"
-                  disabled
-                />
-
-              </div>
-
-
-              {/* LEAVE TYPE */}
-
-              <div className="leave-form-field">
-
-                <label>
-                  Time Off Type
-                </label>
-
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleChange}
-                >
-
-                  <option>
-                    Paid Leave
-                  </option>
-
-                  <option>
-                    Sick Leave
-                  </option>
-
-                  <option>
-                    Unpaid Leave
-                  </option>
-
-                </select>
-
-              </div>
-
-
-              {/* START DATE */}
-
-              <div className="leave-form-field">
-
-                <label>
-                  Start Date
-                </label>
-
-                <input
-                  type="date"
-                  name="startDate"
-                  value={formData.startDate}
-                  onChange={handleChange}
-                />
-
-              </div>
-
-
-              {/* END DATE */}
-
-              <div className="leave-form-field">
-
-                <label>
-                  End Date
-                </label>
-
-                <input
-                  type="date"
-                  name="endDate"
-                  value={formData.endDate}
-                  onChange={handleChange}
-                />
-
-              </div>
-
-
-              {/* DAYS */}
-
-              <div className="leave-form-field">
-
-                <label>
-                  Allocation
-                </label>
-
-                <input
-                  type="text"
-                  value={`${calculateDays()} day${
-                    calculateDays() !== 1
-                      ? "s"
-                      : ""
-                  }`}
-                  disabled
-                />
-
-              </div>
-
-
-              {/* REASON */}
-
-              <div className="leave-form-field leave-reason">
-
-                <label>
-                  Reason
-                </label>
-
-                <textarea
-                  name="reason"
-                  value={formData.reason}
-                  onChange={handleChange}
-                  placeholder="Enter the reason for your leave..."
-                  rows="4"
-                />
-
-              </div>
-
-            </div>
-
-
-            <div className="leave-form-actions">
-
-              <button
-                type="button"
-                className="cancel-leave-button"
-                onClick={() => setShowForm(false)}
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                className="submit-leave-button"
-              >
-                <Send size={15} />
-                Submit Request
-              </button>
-
-            </div>
-
-          </form>
-
-        </section>
-      )}
-
-
-      {/* REQUEST HISTORY */}
-
-      <section className="leave-history">
-
-        <div className="leave-history-header">
+        <div className="leave-balance-card">
 
           <div>
+            <span>Available</span>
 
-            <h2>
-              Time Off Requests
-            </h2>
+            <strong>
+              {leaveBalances[activeType]}
+            </strong>
+
+            <small>Days</small>
+          </div>
+
+          <CalendarDays size={26} />
+
+        </div>
+
+      </section>
+
+      {/* INFORMATION */}
+
+      <section className="timeoff-info">
+
+        <AlertCircle size={18} />
+
+        <p>
+          Submit a time off request by selecting the
+          leave type, validity period and reason.
+          Requests will remain pending until approved
+          by an Admin or HR Officer.
+        </p>
+
+      </section>
+
+      {/* REQUESTS */}
+
+      <section className="requests-section">
+
+        <div className="section-heading">
+
+          <div>
+            <h2>My Requests</h2>
 
             <p>
-              View your previous and pending requests.
+              View your submitted time off requests.
             </p>
-
           </div>
 
         </div>
 
+        {requests.length === 0 ? (
 
-        <div className="leave-table-wrapper">
+          <div className="empty-timeoff">
 
-          <table className="leave-table">
+            <CalendarDays size={32} />
 
-            <thead>
+            <h3>No time off requests</h3>
 
-              <tr>
+            <p>
+              You haven't submitted any leave requests
+              yet.
+            </p>
 
-                <th>
-                  Time Off Type
-                </th>
+            <button
+              onClick={openRequestForm}
+              className="empty-request-button"
+            >
+              <Plus size={17} />
 
-                <th>
-                  Start Date
-                </th>
+              Create Request
+            </button>
 
-                <th>
-                  End Date
-                </th>
+          </div>
 
-                <th>
-                  Days
-                </th>
+        ) : (
 
-                <th>
-                  Status
-                </th>
+          <div className="requests-table-wrapper">
 
-              </tr>
+            <table className="requests-table">
 
-            </thead>
+              <thead>
+                <tr>
+                  <th>Leave Type</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Days</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
 
+              <tbody>
 
-            <tbody>
+                {requests.map((request) => (
 
-              {requests.map(
-                (request, index) => (
-
-                  <tr key={index}>
+                  <tr key={request.id}>
 
                     <td>
-
                       <strong>
                         {request.type}
                       </strong>
-
                     </td>
 
                     <td>
@@ -461,39 +377,294 @@ function TimeOff() {
                     <td>
 
                       <span
-                        className={`leave-status ${
-                          request.status.toLowerCase()
-                        }`}
+                        className={`request-status ${getStatusClass(
+                          request.status
+                        )}`}
                       >
-
-                        {request.status ===
-                        "Approved" ? (
-                          <CheckCircle2 size={13} />
-                        ) : request.status ===
-                          "Rejected" ? (
-                          <XCircle size={13} />
-                        ) : (
-                          <Clock3 size={13} />
+                        {getStatusIcon(
+                          request.status
                         )}
 
                         {request.status}
-
                       </span>
+
+                    </td>
+
+                    <td>
+
+                      {request.status ===
+                        "Pending" && (
+
+                        <button
+                          className="cancel-request-button"
+                          onClick={() =>
+                            cancelRequest(
+                              request.id
+                            )
+                          }
+                        >
+                          Cancel
+                        </button>
+
+                      )}
 
                     </td>
 
                   </tr>
 
-                )
-              )}
+                ))}
 
-            </tbody>
+              </tbody>
 
-          </table>
+            </table>
+
+          </div>
+
+        )}
+
+      </section>
+
+      {/* REQUEST MODAL */}
+
+      {showForm && (
+
+        <div
+          className="timeoff-modal-overlay"
+          onClick={closeRequestForm}
+        >
+
+          <div
+            className="timeoff-modal"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+
+            <div className="modal-header">
+
+              <div>
+                <p className="page-eyebrow">
+                  TIME OFF
+                </p>
+
+                <h2>New Time Off Request</h2>
+              </div>
+
+              <button
+                className="modal-close-button"
+                onClick={closeRequestForm}
+              >
+                <X size={20} />
+              </button>
+
+            </div>
+
+            <form
+              className="timeoff-form"
+              onSubmit={handleSubmit}
+            >
+
+              {/* EMPLOYEE */}
+
+              <div className="form-field">
+
+                <label>
+                  Employee
+                </label>
+
+                <input
+                  type="text"
+                  value="John Doe"
+                  disabled
+                />
+
+              </div>
+
+              {/* TYPE */}
+
+              <div className="form-field">
+
+                <label>
+                  Time Off Type
+                </label>
+
+                <select
+                  value={formData.type}
+                  onChange={(event) =>
+                    updateField(
+                      "type",
+                      event.target.value
+                    )
+                  }
+                >
+
+                  <option>
+                    Paid Time Off
+                  </option>
+
+                  <option>
+                    Sick Leave
+                  </option>
+
+                  <option>
+                    Unpaid Leave
+                  </option>
+
+                </select>
+
+              </div>
+
+              {/* DATES */}
+
+              <div className="form-row">
+
+                <div className="form-field">
+
+                  <label>
+                    Start Date
+                  </label>
+
+                  <input
+                    type="date"
+                    value={formData.startDate}
+                    onChange={(event) =>
+                      updateField(
+                        "startDate",
+                        event.target.value
+                      )
+                    }
+                    required
+                  />
+
+                </div>
+
+                <div className="form-field">
+
+                  <label>
+                    End Date
+                  </label>
+
+                  <input
+                    type="date"
+                    value={formData.endDate}
+                    min={formData.startDate}
+                    onChange={(event) =>
+                      updateField(
+                        "endDate",
+                        event.target.value
+                      )
+                    }
+                    required
+                  />
+
+                </div>
+
+              </div>
+
+              {/* DAYS */}
+
+              <div className="calculated-days">
+
+                <CalendarDays size={17} />
+
+                <span>
+                  Requested days:
+                </span>
+
+                <strong>
+                  {requestedDays}
+                </strong>
+
+              </div>
+
+              {/* REASON */}
+
+              <div className="form-field">
+
+                <label>
+                  Reason
+                </label>
+
+                <textarea
+                  rows="4"
+                  placeholder="Enter reason for your leave..."
+                  value={formData.reason}
+                  onChange={(event) =>
+                    updateField(
+                      "reason",
+                      event.target.value
+                    )
+                  }
+                  required
+                />
+
+              </div>
+
+              {/* ATTACHMENT */}
+
+              <div className="form-field">
+
+                <label>
+                  Attachment
+                  <span className="optional-text">
+                    {" "}
+                    (optional)
+                  </span>
+                </label>
+
+                <label className="attachment-input">
+
+                  <Paperclip size={17} />
+
+                  <span>
+                    {formData.attachment
+                      ? formData.attachment.name
+                      : "Attach document"}
+                  </span>
+
+                  <input
+                    type="file"
+                    onChange={(event) =>
+                      updateField(
+                        "attachment",
+                        event.target.files[0] ||
+                          null
+                      )
+                    }
+                  />
+
+                </label>
+
+              </div>
+
+              {/* BUTTONS */}
+
+              <div className="modal-actions">
+
+                <button
+                  type="button"
+                  className="modal-cancel-button"
+                  onClick={closeRequestForm}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="modal-submit-button"
+                >
+                  Submit Request
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
 
         </div>
 
-      </section>
+      )}
 
     </div>
   );

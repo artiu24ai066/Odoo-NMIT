@@ -1,83 +1,108 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CalendarCheck,
   Clock3,
   LogIn,
   LogOut,
   CheckCircle2,
-  XCircle,
 } from "lucide-react";
 
 function Attendance() {
-  const [checkedIn, setCheckedIn] = useState(false);
-  const [checkInTime, setCheckInTime] = useState(null);
+  const [attendance, setAttendance] = useState(() => {
+    const saved = localStorage.getItem("dayflow_attendance");
 
-  const attendanceHistory = [
-    {
-      date: "Today",
-      checkIn: checkInTime || "--",
-      checkOut: "--",
-      hours: checkedIn ? "Active" : "--",
-      status: checkedIn ? "Present" : "Pending",
-    },
-    {
-      date: "Yesterday",
-      checkIn: "09:12 AM",
-      checkOut: "06:05 PM",
-      hours: "8h 53m",
+    return saved
+      ? JSON.parse(saved)
+      : {
+          checkIn: null,
+          checkOut: null,
+          status: "Not Checked In",
+        };
+  });
+
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "dayflow_attendance",
+      JSON.stringify(attendance)
+    );
+  }, [attendance]);
+
+  const formatTime = (date) => {
+    if (!date) return "--:--";
+
+    return new Date(date).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  };
+
+  const formatDate = () => {
+    return currentTime.toLocaleDateString("en-IN", {
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  const handleCheckIn = () => {
+    if (attendance.checkIn) return;
+
+    const now = new Date().toISOString();
+
+    setAttendance({
+      checkIn: now,
+      checkOut: null,
       status: "Present",
-    },
-    {
-      date: "Aug 20, 2026",
-      checkIn: "09:05 AM",
-      checkOut: "05:58 PM",
-      hours: "8h 53m",
-      status: "Present",
-    },
-    {
-      date: "Aug 19, 2026",
-      checkIn: "09:20 AM",
-      checkOut: "06:10 PM",
-      hours: "8h 50m",
-      status: "Present",
-    },
-    {
-      date: "Aug 18, 2026",
-      checkIn: "--",
-      checkOut: "--",
-      hours: "--",
-      status: "Absent",
-    },
-  ];
+    });
+  };
 
-  const handleAttendance = () => {
-    if (!checkedIn) {
-      const now = new Date();
+  const handleCheckOut = () => {
+    if (!attendance.checkIn || attendance.checkOut) return;
 
-      setCheckInTime(
-        now.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      );
+    const now = new Date().toISOString();
 
-      setCheckedIn(true);
-    } else {
-      setCheckedIn(false);
+    setAttendance((prev) => ({
+      ...prev,
+      checkOut: now,
+      status: "Completed",
+    }));
+  };
+
+  const calculateWorkingHours = () => {
+    if (!attendance.checkIn || !attendance.checkOut) {
+      return "0h 0m";
     }
+
+    const start = new Date(attendance.checkIn);
+    const end = new Date(attendance.checkOut);
+
+    const difference = end - start;
+
+    const totalMinutes = Math.floor(difference / 60000);
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    return `${hours}h ${minutes}m`;
   };
 
   return (
     <div className="attendance-page">
-
-      {/* Header */}
-
-      <div className="attendance-page-header">
-
+      <div className="page-header">
         <div>
-          <p className="page-eyebrow">
-            Employee Portal
-          </p>
+          <p className="page-eyebrow">EMPLOYEE PORTAL</p>
 
           <h1>Attendance</h1>
 
@@ -85,205 +110,162 @@ function Attendance() {
             Track your daily attendance and working hours.
           </p>
         </div>
-
-        <div className="attendance-month">
-          <CalendarCheck size={16} />
-          August 2026
-        </div>
-
       </div>
 
+      {/* DATE AND CURRENT TIME */}
 
-      {/* Today's Attendance */}
-
-      <section className="attendance-overview">
-
-        <div className="attendance-overview-header">
+      <section className="attendance-top-card">
+        <div className="attendance-date">
+          <CalendarCheck size={20} />
 
           <div>
-            <h2>Today's Attendance</h2>
+            <span className="attendance-label">
+              Today
+            </span>
 
-            <p>
-              {checkedIn
-                ? "You are currently checked in."
-                : "You haven't checked in yet."}
+            <strong>{formatDate()}</strong>
+          </div>
+        </div>
+
+        <div className="attendance-current-time">
+          <Clock3 size={20} />
+
+          <div>
+            <span className="attendance-label">
+              Current Time
+            </span>
+
+            <strong>
+              {currentTime.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              })}
+            </strong>
+          </div>
+        </div>
+      </section>
+
+      {/* STATUS */}
+
+      <section className="attendance-status-card">
+        <div className="attendance-status-header">
+          <div>
+            <p className="card-eyebrow">
+              TODAY'S STATUS
             </p>
+
+            <h2>
+              {attendance.status}
+            </h2>
           </div>
 
           <div
-            className={`attendance-status-badge ${
-              checkedIn ? "present" : "pending"
+            className={`attendance-status-dot ${
+              attendance.status === "Present" ||
+              attendance.status === "Completed"
+                ? "status-active"
+                : ""
             }`}
-          >
-            {checkedIn ? (
-              <>
-                <CheckCircle2 size={14} />
-                Present
-              </>
-            ) : (
-              <>
-                <Clock3 size={14} />
-                Pending
-              </>
-            )}
-          </div>
-
+          />
         </div>
 
+        <div className="attendance-status-line" />
 
-        <div className="attendance-overview-content">
+        <div className="attendance-actions">
+          <button
+            className="attendance-button check-in-button"
+            onClick={handleCheckIn}
+            disabled={Boolean(attendance.checkIn)}
+          >
+            <LogIn size={18} />
 
-          <div className="attendance-overview-item">
+            {attendance.checkIn
+              ? "Checked In"
+              : "Check In"}
+          </button>
 
+          <button
+            className="attendance-button check-out-button"
+            onClick={handleCheckOut}
+            disabled={
+              !attendance.checkIn ||
+              Boolean(attendance.checkOut)
+            }
+          >
+            <LogOut size={18} />
+
+            {attendance.checkOut
+              ? "Checked Out"
+              : "Check Out"}
+          </button>
+        </div>
+      </section>
+
+      {/* ATTENDANCE DETAILS */}
+
+      <section className="attendance-details-grid">
+        <div className="attendance-detail-card">
+          <div className="detail-icon">
+            <LogIn size={18} />
+          </div>
+
+          <div>
             <span>Check In</span>
 
             <strong>
-              {checkInTime || "-- : --"}
+              {formatTime(attendance.checkIn)}
             </strong>
+          </div>
+        </div>
 
+        <div className="attendance-detail-card">
+          <div className="detail-icon">
+            <LogOut size={18} />
           </div>
 
-
-          <div className="attendance-overview-item">
-
+          <div>
             <span>Check Out</span>
 
             <strong>
-              --
+              {formatTime(attendance.checkOut)}
             </strong>
+          </div>
+        </div>
 
+        <div className="attendance-detail-card">
+          <div className="detail-icon">
+            <Clock3 size={18} />
           </div>
 
-
-          <div className="attendance-overview-item">
-
+          <div>
             <span>Working Hours</span>
 
             <strong>
-              {checkedIn ? "Active" : "0h 00m"}
+              {calculateWorkingHours()}
             </strong>
-
           </div>
-
-
-          <button
-            className={`attendance-main-button ${
-              checkedIn ? "checkout" : ""
-            }`}
-            onClick={handleAttendance}
-          >
-
-            {checkedIn ? (
-              <>
-                <LogOut size={17} />
-                Check Out
-              </>
-            ) : (
-              <>
-                <LogIn size={17} />
-                Check In
-              </>
-            )}
-
-          </button>
-
         </div>
-
       </section>
 
+      {/* INFORMATION */}
 
-      {/* History */}
-
-      <section className="attendance-history">
-
-        <div className="attendance-history-header">
-
-          <div>
-            <h2>Attendance History</h2>
-
-            <p>
-              Your recent attendance records.
-            </p>
-          </div>
-
+      <section className="attendance-info-card">
+        <div className="attendance-info-icon">
+          <CheckCircle2 size={20} />
         </div>
 
+        <div>
+          <h3>Attendance Information</h3>
 
-        <div className="attendance-table-wrapper">
-
-          <table className="attendance-table">
-
-            <thead>
-
-              <tr>
-                <th>Date</th>
-                <th>Check In</th>
-                <th>Check Out</th>
-                <th>Working Hours</th>
-                <th>Status</th>
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {attendanceHistory.map(
-                (record, index) => (
-                  <tr key={index}>
-
-                    <td>
-                      <strong>
-                        {record.date}
-                      </strong>
-                    </td>
-
-                    <td>
-                      {record.checkIn}
-                    </td>
-
-                    <td>
-                      {record.checkOut}
-                    </td>
-
-                    <td>
-                      {record.hours}
-                    </td>
-
-                    <td>
-
-                      <span
-                        className={`history-status ${
-                          record.status
-                            .toLowerCase()
-                            .replace(" ", "-")
-                        }`}
-                      >
-
-                        {record.status === "Present" ||
-                        record.status === "Pending" ? (
-                          <CheckCircle2 size={13} />
-                        ) : (
-                          <XCircle size={13} />
-                        )}
-
-                        {record.status}
-
-                      </span>
-
-                    </td>
-
-                  </tr>
-                )
-              )}
-
-            </tbody>
-
-          </table>
-
+          <p>
+            Check in when you start your workday and
+            check out when your workday is complete.
+            Your attendance status and working hours
+            are automatically calculated.
+          </p>
         </div>
-
       </section>
-
     </div>
   );
 }
