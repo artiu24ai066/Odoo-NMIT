@@ -17,6 +17,7 @@ import {
 import TimeOff from "./pages/TimeOff";
 import Attendance from "./pages/Attendance";
 import Profile from "./pages/Profile";
+import AdminTimeOff from "./pages/AdminTimeOff";
 
 import "./App.css";
 
@@ -266,6 +267,11 @@ function App() {
                 replace
               />
             }
+          />
+
+          <Route
+            path="/admin/time-off"
+            element={<AdminTimeOff />}
           />
 
         </Routes>

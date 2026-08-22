@@ -1,670 +1,315 @@
 import { useState } from "react";
 import {
-  CalendarDays,
-  Plus,
-  X,
-  Paperclip,
   Clock3,
   CheckCircle2,
   XCircle,
-  AlertCircle,
+  CalendarDays,
+  Search,
+  User,
 } from "lucide-react";
 
-function TimeOff() {
-  const [activeType, setActiveType] = useState("Paid Time Off");
-
-  const [requests, setRequests] = useState(() => {
-    const saved = localStorage.getItem("dayflow_timeoff");
-
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [showForm, setShowForm] = useState(false);
-
-  const [formData, setFormData] = useState({
+const initialRequests = [
+  {
+    id: 1,
+    employee: "John Doe",
+    employeeId: "EMP0001",
     type: "Paid Time Off",
-    startDate: "",
-    endDate: "",
-    reason: "",
-    attachment: null,
+    startDate: "28/10/2026",
+    endDate: "30/10/2026",
+    days: 3,
+    reason: "Family vacation",
+    status: "Pending",
+  },
+  {
+    id: 2,
+    employee: "Priya Sharma",
+    employeeId: "EMP0002",
+    type: "Sick Leave",
+    startDate: "02/11/2026",
+    endDate: "03/11/2026",
+    days: 2,
+    reason: "Medical appointment",
+    status: "Pending",
+  },
+  {
+    id: 3,
+    employee: "Rahul Kumar",
+    employeeId: "EMP0003",
+    type: "Paid Time Off",
+    startDate: "10/11/2026",
+    endDate: "11/11/2026",
+    days: 2,
+    reason: "Personal work",
+    status: "Approved",
+  },
+];
+
+function TimeOff() {
+  const [requests, setRequests] = useState(initialRequests);
+  const [search, setSearch] = useState("");
+
+  const updateStatus = (id, status) => {
+    setRequests((currentRequests) =>
+      currentRequests.map((request) =>
+        request.id === id
+          ? { ...request, status }
+          : request
+      )
+    );
+  };
+
+  const filteredRequests = requests.filter((request) => {
+    const searchText = search.toLowerCase();
+
+    return (
+      request.employee.toLowerCase().includes(searchText) ||
+      request.employeeId.toLowerCase().includes(searchText) ||
+      request.type.toLowerCase().includes(searchText)
+    );
   });
 
-  const leaveBalances = {
-    "Paid Time Off": 24,
-    "Sick Leave": 7,
-    "Unpaid Leave": 0,
-  };
+  const pendingCount = requests.filter(
+    (request) => request.status === "Pending"
+  ).length;
 
-  const getDays = (startDate, endDate) => {
-    if (!startDate || !endDate) {
-      return 0;
-    }
+  const approvedCount = requests.filter(
+    (request) => request.status === "Approved"
+  ).length;
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    if (end < start) {
-      return 0;
-    }
-
-    const difference = end - start;
-
-    return Math.floor(
-      difference / (1000 * 60 * 60 * 24)
-    ) + 1;
-  };
-
-  const requestedDays = getDays(
-    formData.startDate,
-    formData.endDate
-  );
-
-  const updateField = (field, value) => {
-    setFormData((previous) => ({
-      ...previous,
-      [field]: value,
-    }));
-  };
-
-  const openRequestForm = () => {
-    setFormData({
-      type: activeType,
-      startDate: "",
-      endDate: "",
-      reason: "",
-      attachment: null,
-    });
-
-    setShowForm(true);
-  };
-
-  const closeRequestForm = () => {
-    setShowForm(false);
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    if (
-      !formData.startDate ||
-      !formData.endDate ||
-      !formData.reason
-    ) {
-      alert("Please fill all required fields.");
-      return;
-    }
-
-    if (requestedDays <= 0) {
-      alert("Please select valid dates.");
-      return;
-    }
-
-    if (
-      formData.type !== "Unpaid Leave" &&
-      requestedDays > leaveBalances[formData.type]
-    ) {
-      alert(
-        `You only have ${leaveBalances[formData.type]} days available.`
-      );
-      return;
-    }
-
-    const newRequest = {
-      id: Date.now(),
-      employee: "John Doe",
-      type: formData.type,
-      startDate: formData.startDate,
-      endDate: formData.endDate,
-      days: requestedDays,
-      reason: formData.reason,
-      attachment: formData.attachment
-        ? formData.attachment.name
-        : null,
-      status: "Pending",
-      createdAt: new Date().toISOString(),
-    };
-
-    const updatedRequests = [
-      newRequest,
-      ...requests,
-    ];
-
-    setRequests(updatedRequests);
-
-    localStorage.setItem(
-      "dayflow_timeoff",
-      JSON.stringify(updatedRequests)
-    );
-
-    setShowForm(false);
-
-    setFormData({
-      type: activeType,
-      startDate: "",
-      endDate: "",
-      reason: "",
-      attachment: null,
-    });
-  };
-
-  const cancelRequest = (id) => {
-    const updatedRequests = requests.filter(
-      (request) => request.id !== id
-    );
-
-    setRequests(updatedRequests);
-
-    localStorage.setItem(
-      "dayflow_timeoff",
-      JSON.stringify(updatedRequests)
-    );
-  };
-
-  const getStatusIcon = (status) => {
-    if (status === "Approved") {
-      return <CheckCircle2 size={16} />;
-    }
-
-    if (status === "Rejected") {
-      return <XCircle size={16} />;
-    }
-
-    return <Clock3 size={16} />;
-  };
-
-  const getStatusClass = (status) => {
-    if (status === "Approved") {
-      return "status-approved";
-    }
-
-    if (status === "Rejected") {
-      return "status-rejected";
-    }
-
-    return "status-pending";
-  };
+  const rejectedCount = requests.filter(
+    (request) => request.status === "Rejected"
+  ).length;
 
   return (
-    <div className="timeoff-page">
+    <div className="page-container">
 
       {/* HEADER */}
-
-      <div className="timeoff-header">
+      <div className="page-header">
         <div>
-          <p className="page-eyebrow">
-            EMPLOYEE PORTAL
-          </p>
+          <p className="page-eyebrow">ADMINISTRATION</p>
 
-          <h1>Time Off</h1>
+          <h1>Time Off Requests</h1>
 
           <p className="page-description">
-            Manage your leave requests and available
-            time off.
+            Review and manage employee time off requests.
           </p>
         </div>
-
-        <button
-          className="new-timeoff-button"
-          onClick={openRequestForm}
-        >
-          <Plus size={18} />
-
-          New Request
-        </button>
       </div>
 
-      {/* LEAVE TYPE TABS */}
+      {/* STATISTICS */}
+      <div className="stats-grid">
 
-      <section className="leave-type-section">
-
-        <div className="leave-tabs">
-
-          <button
-            className={
-              activeType === "Paid Time Off"
-                ? "leave-tab active"
-                : "leave-tab"
-            }
-            onClick={() =>
-              setActiveType("Paid Time Off")
-            }
-          >
-            Paid Time Off
-          </button>
-
-          <button
-            className={
-              activeType === "Sick Leave"
-                ? "leave-tab active"
-                : "leave-tab"
-            }
-            onClick={() =>
-              setActiveType("Sick Leave")
-            }
-          >
-            Sick Leave
-          </button>
-
-          <button
-            className={
-              activeType === "Unpaid Leave"
-                ? "leave-tab active"
-                : "leave-tab"
-            }
-            onClick={() =>
-              setActiveType("Unpaid Leave")
-            }
-          >
-            Unpaid Leave
-          </button>
-
-        </div>
-
-        <div className="leave-balance-card">
-
-          <div>
-            <span>Available</span>
-
-            <strong>
-              {leaveBalances[activeType]}
-            </strong>
-
-            <small>Days</small>
+        <div className="stat-card">
+          <div className="stat-icon pending">
+            <Clock3 size={20} />
           </div>
 
-          <CalendarDays size={26} />
-
+          <div>
+            <p>Pending</p>
+            <strong>{pendingCount}</strong>
+          </div>
         </div>
 
-      </section>
-
-      {/* INFORMATION */}
-
-      <section className="timeoff-info">
-
-        <AlertCircle size={18} />
-
-        <p>
-          Submit a time off request by selecting the
-          leave type, validity period and reason.
-          Requests will remain pending until approved
-          by an Admin or HR Officer.
-        </p>
-
-      </section>
-
-      {/* REQUESTS */}
-
-      <section className="requests-section">
-
-        <div className="section-heading">
+        <div className="stat-card">
+          <div className="stat-icon approved">
+            <CheckCircle2 size={20} />
+          </div>
 
           <div>
-            <h2>My Requests</h2>
+            <p>Approved</p>
+            <strong>{approvedCount}</strong>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon rejected">
+            <XCircle size={20} />
+          </div>
+
+          <div>
+            <p>Rejected</p>
+            <strong>{rejectedCount}</strong>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon total">
+            <CalendarDays size={20} />
+          </div>
+
+          <div>
+            <p>Total Requests</p>
+            <strong>{requests.length}</strong>
+          </div>
+        </div>
+
+      </div>
+
+      {/* REQUEST SECTION */}
+      <section className="content-section">
+
+        <div className="section-header">
+          <div>
+            <h2>Employee Requests</h2>
 
             <p>
-              View your submitted time off requests.
+              Review submitted time off requests.
             </p>
           </div>
 
+          {/* SEARCH */}
+          <div className="search-box">
+            <Search size={17} />
+
+            <input
+              type="text"
+              placeholder="Search employee..."
+              value={search}
+              onChange={(event) =>
+                setSearch(event.target.value)
+              }
+            />
+          </div>
         </div>
 
-        {requests.length === 0 ? (
+        {/* REQUESTS */}
+        {filteredRequests.length === 0 ? (
 
-          <div className="empty-timeoff">
+          <div className="empty-state">
+            <CalendarDays size={42} />
 
-            <CalendarDays size={32} />
-
-            <h3>No time off requests</h3>
+            <h3>No requests available</h3>
 
             <p>
-              You haven't submitted any leave requests
-              yet.
+              Employee time off requests will appear here.
             </p>
-
-            <button
-              onClick={openRequestForm}
-              className="empty-request-button"
-            >
-              <Plus size={17} />
-
-              Create Request
-            </button>
-
           </div>
 
         ) : (
 
-          <div className="requests-table-wrapper">
+          <div className="request-list">
 
-            <table className="requests-table">
+            {filteredRequests.map((request) => (
 
-              <thead>
-                <tr>
-                  <th>Leave Type</th>
-                  <th>Start Date</th>
-                  <th>End Date</th>
-                  <th>Days</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
+              <div
+                className="request-card"
+                key={request.id}
+              >
 
-              <tbody>
+                {/* EMPLOYEE */}
+                <div className="request-employee">
 
-                {requests.map((request) => (
+                  <div className="employee-avatar">
+                    <User size={20} />
+                  </div>
 
-                  <tr key={request.id}>
+                  <div>
+                    <h3>{request.employee}</h3>
 
-                    <td>
-                      <strong>
-                        {request.type}
-                      </strong>
-                    </td>
+                    <span>
+                      {request.employeeId}
+                    </span>
+                  </div>
 
-                    <td>
-                      {request.startDate}
-                    </td>
+                </div>
 
-                    <td>
-                      {request.endDate}
-                    </td>
+                {/* LEAVE DETAILS */}
+                <div className="request-details">
 
-                    <td>
+                  <div>
+                    <span className="detail-label">
+                      Leave Type
+                    </span>
+
+                    <strong>
+                      {request.type}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span className="detail-label">
+                      Duration
+                    </span>
+
+                    <strong>
+                      {request.startDate} - {request.endDate}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span className="detail-label">
+                      Days
+                    </span>
+
+                    <strong>
                       {request.days}
-                    </td>
+                    </strong>
+                  </div>
 
-                    <td>
+                  <div>
+                    <span className="detail-label">
+                      Reason
+                    </span>
 
-                      <span
-                        className={`request-status ${getStatusClass(
-                          request.status
-                        )}`}
+                    <strong>
+                      {request.reason}
+                    </strong>
+                  </div>
+
+                </div>
+
+                {/* STATUS + ACTIONS */}
+                <div className="request-actions">
+
+                  <span
+                    className={`status-badge ${request.status.toLowerCase()}`}
+                  >
+                    {request.status}
+                  </span>
+
+                  {request.status === "Pending" && (
+                    <div className="action-buttons">
+
+                      <button
+                        className="approve-button"
+                        onClick={() =>
+                          updateStatus(
+                            request.id,
+                            "Approved"
+                          )
+                        }
                       >
-                        {getStatusIcon(
-                          request.status
-                        )}
+                        <CheckCircle2 size={16} />
+                        Approve
+                      </button>
 
-                        {request.status}
-                      </span>
+                      <button
+                        className="reject-button"
+                        onClick={() =>
+                          updateStatus(
+                            request.id,
+                            "Rejected"
+                          )
+                        }
+                      >
+                        <XCircle size={16} />
+                        Reject
+                      </button>
 
-                    </td>
+                    </div>
+                  )}
 
-                    <td>
+                </div>
 
-                      {request.status ===
-                        "Pending" && (
+              </div>
 
-                        <button
-                          className="cancel-request-button"
-                          onClick={() =>
-                            cancelRequest(
-                              request.id
-                            )
-                          }
-                        >
-                          Cancel
-                        </button>
-
-                      )}
-
-                    </td>
-
-                  </tr>
-
-                ))}
-
-              </tbody>
-
-            </table>
+            ))}
 
           </div>
 
         )}
 
       </section>
-
-      {/* REQUEST MODAL */}
-
-      {showForm && (
-
-        <div
-          className="timeoff-modal-overlay"
-          onClick={closeRequestForm}
-        >
-
-          <div
-            className="timeoff-modal"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
-          >
-
-            <div className="modal-header">
-
-              <div>
-                <p className="page-eyebrow">
-                  TIME OFF
-                </p>
-
-                <h2>New Time Off Request</h2>
-              </div>
-
-              <button
-                className="modal-close-button"
-                onClick={closeRequestForm}
-              >
-                <X size={20} />
-              </button>
-
-            </div>
-
-            <form
-              className="timeoff-form"
-              onSubmit={handleSubmit}
-            >
-
-              {/* EMPLOYEE */}
-
-              <div className="form-field">
-
-                <label>
-                  Employee
-                </label>
-
-                <input
-                  type="text"
-                  value="John Doe"
-                  disabled
-                />
-
-              </div>
-
-              {/* TYPE */}
-
-              <div className="form-field">
-
-                <label>
-                  Time Off Type
-                </label>
-
-                <select
-                  value={formData.type}
-                  onChange={(event) =>
-                    updateField(
-                      "type",
-                      event.target.value
-                    )
-                  }
-                >
-
-                  <option>
-                    Paid Time Off
-                  </option>
-
-                  <option>
-                    Sick Leave
-                  </option>
-
-                  <option>
-                    Unpaid Leave
-                  </option>
-
-                </select>
-
-              </div>
-
-              {/* DATES */}
-
-              <div className="form-row">
-
-                <div className="form-field">
-
-                  <label>
-                    Start Date
-                  </label>
-
-                  <input
-                    type="date"
-                    value={formData.startDate}
-                    onChange={(event) =>
-                      updateField(
-                        "startDate",
-                        event.target.value
-                      )
-                    }
-                    required
-                  />
-
-                </div>
-
-                <div className="form-field">
-
-                  <label>
-                    End Date
-                  </label>
-
-                  <input
-                    type="date"
-                    value={formData.endDate}
-                    min={formData.startDate}
-                    onChange={(event) =>
-                      updateField(
-                        "endDate",
-                        event.target.value
-                      )
-                    }
-                    required
-                  />
-
-                </div>
-
-              </div>
-
-              {/* DAYS */}
-
-              <div className="calculated-days">
-
-                <CalendarDays size={17} />
-
-                <span>
-                  Requested days:
-                </span>
-
-                <strong>
-                  {requestedDays}
-                </strong>
-
-              </div>
-
-              {/* REASON */}
-
-              <div className="form-field">
-
-                <label>
-                  Reason
-                </label>
-
-                <textarea
-                  rows="4"
-                  placeholder="Enter reason for your leave..."
-                  value={formData.reason}
-                  onChange={(event) =>
-                    updateField(
-                      "reason",
-                      event.target.value
-                    )
-                  }
-                  required
-                />
-
-              </div>
-
-              {/* ATTACHMENT */}
-
-              <div className="form-field">
-
-                <label>
-                  Attachment
-                  <span className="optional-text">
-                    {" "}
-                    (optional)
-                  </span>
-                </label>
-
-                <label className="attachment-input">
-
-                  <Paperclip size={17} />
-
-                  <span>
-                    {formData.attachment
-                      ? formData.attachment.name
-                      : "Attach document"}
-                  </span>
-
-                  <input
-                    type="file"
-                    onChange={(event) =>
-                      updateField(
-                        "attachment",
-                        event.target.files[0] ||
-                          null
-                      )
-                    }
-                  />
-
-                </label>
-
-              </div>
-
-              {/* BUTTONS */}
-
-              <div className="modal-actions">
-
-                <button
-                  type="button"
-                  className="modal-cancel-button"
-                  onClick={closeRequestForm}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="modal-submit-button"
-                >
-                  Submit Request
-                </button>
-
-              </div>
-
-            </form>
-
-          </div>
-
-        </div>
-
-      )}
 
     </div>
   );
