@@ -1265,3 +1265,459 @@ body {
     text-align: left;
   }
 }
+
+/* =========================================
+   DASHBOARD HEADER
+========================================= */
+
+.dashboard-header {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-end;
+
+  gap: 20px;
+
+  margin-bottom: 28px;
+}
+
+.dashboard-date {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 9px 13px;
+
+  border: 1px solid #303035;
+
+  border-radius: 7px;
+
+  background: #161618;
+
+  color: #85858d;
+
+  font-size: 12px;
+}
+
+
+/* =========================================
+   DASHBOARD STATS
+========================================= */
+
+.dashboard-stats {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 16px;
+
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  padding: 20px;
+
+  border: 1px solid #303035;
+
+  border-radius: 10px;
+
+  background: #161618;
+}
+
+.stat-card-top {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  color: #85858d;
+
+  font-size: 12px;
+}
+
+.stat-icon {
+  width: 34px;
+
+  height: 34px;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 7px;
+
+  background: rgba(180, 75, 201, 0.1);
+
+  color: #c35ddd;
+}
+
+.stat-card h2 {
+  margin: 17px 0 5px;
+
+  color: #ffffff;
+
+  font-size: 21px;
+}
+
+.stat-card p {
+  margin: 0;
+
+  color: #68686f;
+
+  font-size: 11px;
+}
+
+
+/* =========================================
+   MAIN DASHBOARD GRID
+========================================= */
+
+.dashboard-main-grid {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.3fr)
+    minmax(0, 1fr);
+
+  gap: 18px;
+
+  margin-bottom: 18px;
+}
+
+
+/* =========================================
+   PANELS
+========================================= */
+
+.dashboard-panel {
+  padding: 22px;
+
+  border: 1px solid #303035;
+
+  border-radius: 10px;
+
+  background: #161618;
+}
+
+.panel-header {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 15px;
+
+  margin-bottom: 24px;
+
+  color: #85858d;
+}
+
+.panel-header h3 {
+  margin: 0 0 5px;
+
+  color: #ffffff;
+
+  font-size: 15px;
+}
+
+.panel-header p {
+  margin: 0;
+
+  color: #68686f;
+
+  font-size: 11px;
+}
+
+
+/* =========================================
+   ATTENDANCE
+========================================= */
+
+.attendance-status {
+  display: flex;
+
+  align-items: center;
+
+  gap: 18px;
+
+  padding: 18px;
+
+  border: 1px solid #29292e;
+
+  border-radius: 8px;
+
+  background: #111113;
+}
+
+.attendance-time {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+  min-width: 90px;
+}
+
+.attendance-time span {
+  color: #ffffff;
+
+  font-size: 20px;
+
+  font-weight: 700;
+}
+
+.attendance-time small {
+  color: #68686f;
+
+  font-size: 10px;
+}
+
+.attendance-line {
+  flex: 1;
+
+  height: 1px;
+
+  background: #34343a;
+}
+
+.attendance-button {
+  width: 100%;
+
+  height: 42px;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  gap: 8px;
+
+  margin-top: 16px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: #b44bc9;
+
+  color: #ffffff;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
+}
+
+.attendance-button:hover {
+  background: #c158d5;
+}
+
+.attendance-button:active {
+  transform: scale(0.98);
+}
+
+.attendance-button.checkout {
+  background: #37373d;
+}
+
+.attendance-button.checkout:hover {
+  background: #45454c;
+}
+
+
+/* =========================================
+   QUICK ACTIONS
+========================================= */
+
+.quick-action-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.dashboard-action-row {
+  width: 100%;
+
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 13px;
+
+  border: 1px solid transparent;
+
+  border-radius: 7px;
+
+  background: #111113;
+
+  color: #85858d;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.dashboard-action-row:hover {
+  background: #202024;
+
+  border-color: #36363c;
+
+  color: #c35ddd;
+}
+
+.dashboard-action-row div {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.dashboard-action-row strong {
+  color: #d7d7da;
+
+  font-size: 12px;
+}
+
+.dashboard-action-row span {
+  color: #68686f;
+
+  font-size: 10px;
+}
+
+
+/* =========================================
+   RECENT ACTIVITY
+========================================= */
+
+.recent-panel {
+  margin-bottom: 20px;
+}
+
+.activity-list {
+  display: flex;
+
+  flex-direction: column;
+}
+
+.activity-item {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 13px 0;
+
+  border-bottom: 1px solid #28282d;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+
+  padding-bottom: 0;
+}
+
+.activity-dot {
+  width: 32px;
+
+  height: 32px;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: rgba(180, 75, 201, 0.1);
+
+  color: #c35ddd;
+}
+
+.activity-content {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.activity-content strong {
+  color: #ccccd0;
+
+  font-size: 12px;
+}
+
+.activity-content span {
+  color: #68686f;
+
+  font-size: 10px;
+}
+
+
+/* =========================================
+   DASHBOARD RESPONSIVE
+========================================= */
+
+@media (max-width: 1100px) {
+  .dashboard-stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-header {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+  .dashboard-date {
+    width: 100%;
+
+    justify-content: center;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-status {
+    gap: 10px;
+  }
+
+  .attendance-time {
+    min-width: 70px;
+  }
+
+  .attendance-time span {
+    font-size: 16px;
+  }
+}
