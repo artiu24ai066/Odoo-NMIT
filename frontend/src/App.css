@@ -1,1 +1,447 @@
-@import "tailwindcss";
+/* =========================================
+   GLOBAL
+========================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+}
+
+
+/* =========================================
+   AUTH PAGE
+========================================= */
+
+.auth-page {
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 32px 20px;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(180, 75, 201, 0.15),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(100, 60, 160, 0.12),
+      transparent 35%
+    ),
+    #0d0d0f;
+}
+
+
+/* =========================================
+   AUTH CARD
+========================================= */
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+
+  padding: 42px 40px;
+
+  background: #161618;
+
+  border: 1px solid #303035;
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.45);
+
+  color: #ffffff;
+}
+
+
+/* =========================================
+   LOGO
+========================================= */
+
+.logo-section {
+  text-align: center;
+
+  margin-bottom: 32px;
+}
+
+.company-logo {
+  display: inline-flex;
+
+  justify-content: center;
+  align-items: center;
+
+  min-width: 150px;
+  height: 52px;
+
+  padding: 0 22px;
+
+  border-radius: 9px;
+
+  background: #242428;
+
+  border: 1px solid #3b3b42;
+
+  color: #ffffff;
+
+  font-size: 20px;
+  font-weight: 800;
+
+  letter-spacing: 2px;
+}
+
+.logo-subtitle {
+  margin: 10px 0 0;
+
+  color: #88888f;
+
+  font-size: 13px;
+}
+
+
+/* =========================================
+   HEADING
+========================================= */
+
+.auth-heading {
+  text-align: center;
+
+  margin-bottom: 30px;
+}
+
+.auth-heading h1 {
+  margin: 0 0 8px;
+
+  font-size: 27px;
+
+  font-weight: 700;
+
+  color: #ffffff;
+}
+
+.auth-heading p {
+  margin: 0;
+
+  color: #88888f;
+
+  font-size: 14px;
+}
+
+
+/* =========================================
+   FORM
+========================================= */
+
+.login-form {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 21px;
+}
+
+.form-field {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.form-field label {
+  color: #dddddf;
+
+  font-size: 14px;
+
+  font-weight: 500;
+}
+
+.form-field input {
+  width: 100%;
+
+  height: 46px;
+
+  padding: 0 14px;
+
+  border: 1px solid #3b3b40;
+
+  border-radius: 7px;
+
+  outline: none;
+
+  background: #101012;
+
+  color: #ffffff;
+
+  font-size: 14px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.form-field input::placeholder {
+  color: #606067;
+}
+
+.form-field input:focus {
+  border-color: #b44bc9;
+
+  background: #131316;
+
+  box-shadow:
+    0 0 0 3px rgba(180, 75, 201, 0.12);
+}
+
+
+/* =========================================
+   PASSWORD
+========================================= */
+
+.password-input-container {
+  position: relative;
+
+  width: 100%;
+}
+
+.password-input-container input {
+  padding-right: 50px;
+}
+
+.password-toggle {
+  position: absolute;
+
+  right: 13px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  padding: 4px;
+
+  border: none;
+
+  background: transparent;
+
+  color: #85858d;
+
+  cursor: pointer;
+
+  transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+  color: #c35ddd;
+}
+
+
+/* =========================================
+   ERROR
+========================================= */
+
+.form-error {
+  margin-top: -5px;
+
+  padding: 10px 12px;
+
+  border-radius: 6px;
+
+  border: 1px solid rgba(220, 70, 70, 0.35);
+
+  background: rgba(220, 70, 70, 0.08);
+
+  color: #ff8b8b;
+
+  font-size: 13px;
+}
+
+
+/* =========================================
+   SIGN IN BUTTON
+========================================= */
+
+.signin-button {
+  width: 100%;
+
+  height: 46px;
+
+  margin-top: 4px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: #b44bc9;
+
+  color: #ffffff;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.5px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.signin-button:hover {
+  background: #c158d5;
+
+  box-shadow:
+    0 7px 22px rgba(180, 75, 201, 0.25);
+}
+
+.signin-button:active {
+  transform: scale(0.98);
+}
+
+
+/* =========================================
+   SIGNUP SECTION
+========================================= */
+
+.signup-section {
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  gap: 6px;
+
+  margin-top: 26px;
+
+  color: #85858d;
+
+  font-size: 14px;
+}
+
+.signup-link {
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: #c35ddd;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.signup-link:hover {
+  color: #d675e7;
+
+  text-decoration: underline;
+}
+
+
+/* =========================================
+   SIGNUP PLACEHOLDER
+========================================= */
+
+.signup-placeholder {
+  text-align: center;
+
+  color: #88888f;
+
+  font-size: 14px;
+}
+
+.signup-placeholder p {
+  margin: 0 0 22px;
+}
+
+
+/* =========================================
+   DUMMY DASHBOARD
+========================================= */
+
+.dummy-page {
+  min-height: 100vh;
+
+  padding: 50px;
+
+  background: #0d0d0f;
+
+  color: white;
+}
+
+.dummy-page h1 {
+  margin-top: 0;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 600px) {
+  .auth-page {
+    padding: 20px 14px;
+  }
+
+  .auth-card {
+    padding: 32px 24px;
+
+    border-radius: 11px;
+  }
+
+  .auth-heading h1 {
+    font-size: 24px;
+  }
+}
+
+
+@media (max-width: 400px) {
+  .auth-card {
+    padding: 28px 18px;
+  }
+
+  .company-logo {
+    min-width: 130px;
+
+    height: 48px;
+
+    font-size: 18px;
+  }
+
+  .signup-section {
+    flex-direction: column;
+
+    gap: 4px;
+  }
+}
